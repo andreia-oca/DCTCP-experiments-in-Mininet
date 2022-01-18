@@ -177,7 +177,7 @@ def dctcp():
     
     # Monitor the congestion window (it should resize according to 
     # the CCA used RENO or CUBIC)
-    # start_tcpprobe("cwnd.txt")
+    start_tcpprobe()
 
     # Start monitoring the queue size.
     # The interface that I am monitoring is the one between the switch and the receiver 
@@ -190,18 +190,19 @@ def dctcp():
         if delta > args.time:
             break
 
-    # stop_tcpprobe()
+    stop_tcpprobe()
     qmon.terminate()
     network.stop()
 
 # tcp_probe is a kernel module which records the congestion window (cwnd)) over time. 
 # In linux OS >= 4.16 it has been replaced by the tcp:tcp_probe kernel tracepoint.
-# def start_tcpprobe(outfile="cwnd.txt"):
-#     os.system("rmmod tcp_probe; modprobe tcp_probe full=1;")
-#     Popen("cat /proc/net/tcpprobe > %s/%s" % (args.dir, outfile),shell=True)
+def start_tcpprobe(outfile="cwnd.txt"):
+    os.system("echo -n 1 | sudo tee /sys/kernel/debug/tracing/events/tcp/tcp_probe/enable")
+    Popen("sudo cat /sys/kernel/debug/tracing/events/tcp/tcp_probe/trace > %s/%s" % (args.dir, outfile),shell=True)
 
-# def stop_tcpprobe():
-#     Popen("killall -9 cat", shell=True).wait()
+def stop_tcpprobe():
+    os.system("echo -n 0 | sudo tee /sys/kernel/debug/tracing/events/tcp/tcp_probe/enable")
+    Popen("killall -9 cat", shell=True).wait()
 
 def start_iperf(net):
     receiver = net.get('h0')
