@@ -12,13 +12,21 @@ qsize=120
 
 dir=output
 
+# WARNING
+if [ "$UID" != "0" ]; then
+    warn "Please run as root"
+    exit 0
+fi
+
 # Experiment 1
 # Queue occupancy over time - comparing DCTCP & TCP
 
 #Make directories for TCP, DCTCP and the comparison graph
-dir_dctcp_reno=dctcp_reno-q$qsize
-dir_tcp=tcp-q$qsize
+dir_dctcp_reno=dctcp_reno_q$qsize
+dir_dctcp_cubic=dctcp_cubic_q$qsize
+dir_tcp=tcp_q$qsize
 
+mkdir -p $dir/$dir_dctcp_cubic
 mkdir -p $dir/$dir_dctcp_reno
 mkdir -p $dir/$dir_tcp 
 
@@ -34,6 +42,17 @@ python3 dctcp.py --hosts $hosts \
                 --ecn True \
                 --dctcp True \
                 --cca reno
+
+python3 dctcp.py --hosts $hosts \
+                --bw-sender $bw_sender \
+                --bw-receiver $bw_receiver \
+                --delay $delay \
+                --dir $dir/$dir_dctcp_cubic \
+                --maxq $qsize \
+                --red True \
+                --ecn True \
+                --dctcp True \
+                --cca cubic
 
 # Measure queue occupancy with TCP
 python3 dctcp.py --hosts $hosts \
