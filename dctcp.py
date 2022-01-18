@@ -6,6 +6,7 @@ from mininet.link import TCLink, TCIntf, Link
 from mininet.topo import Topo
 from mininet.util import dumpNodeConnections
  
+from time import sleep, time
 from subprocess import Popen, PIPE
 from multiprocessing import Process
 from argparse import ArgumentParser
@@ -43,6 +44,11 @@ parser.add_argument('--maxq',
                     type=int,
                     help="Max buffer size of network interface in packets",
                     default=100)
+
+parser.add_argument('--time', '-t',
+                    help="Duration (sec) to run the experiment",
+                    type=int,
+                    default=10)
 
 parser.add_argument('--red',
                     help="Enable RED, by default is disabled",
@@ -91,6 +97,14 @@ parser.add_argument('--red_prob',
 
 args = parser.parse_args()
 
+# The topology is a start topology:
+# 1 switch, host 0 is the receiver and the rest (n-1) hosts are the senders
+#             h0
+#             |
+#             sw
+# ------------|--------
+# |   |               |
+# h1  h2              h_n-1
 class DCTopo(Topo):
     "Simple topology for DCTCP experiment."
 
@@ -156,17 +170,32 @@ def dctcp():
     network.pingAll()
 
     # TODO Add Experiments
-
-    # Start all the monitoring processes
+    start_iperf(network)
+    sleep(30)
+    
+    # Start the monitoring processes
+    
+    # Monitor the congestion window (it should resize according to 
+    # the CCA used RENO or CUBIC)
     # start_tcpprobe("cwnd.txt")
 
-    # Start monitoring the queue sizes. 
+    # Start monitoring the queue size.
+    # The interface that I am monitoring is the one between the switch and the receiver 
     qmon = start_qmon(iface='s0-eth1', outfile='%s/q.txt' % (args.dir))
+
+    start_time = time()
+    while True:
+        now = time()
+        delta = now - start_time
+        if delta > args.time:
+            break
 
     # stop_tcpprobe()
     qmon.terminate()
     network.stop()
 
+# tcp_probe is a kernel module which records the congestion window (cwnd)) over time. 
+# In linux OS >= 4.16 it has been replaced by the tcp:tcp_probe kernel tracepoint.
 # def start_tcpprobe(outfile="cwnd.txt"):
 #     os.system("rmmod tcp_probe; modprobe tcp_probe full=1;")
 #     Popen("cat /proc/net/tcpprobe > %s/%s" % (args.dir, outfile),shell=True)
@@ -174,7 +203,22 @@ def dctcp():
 # def stop_tcpprobe():
 #     Popen("killall -9 cat", shell=True).wait()
 
-def start_qmon(iface, interval_sec=0.1, outfile="q.txt"):
+def start_iperf(net):
+    receiver = net.get('h0')
+    print("Starting iperf server")
+
+    # Starting iperf in server mode with a window size of 16Mb
+    server = receiver.popen("iperf -s -w 16m")
+
+    for i in range(1,args.hosts):
+        h = net.get('h%s' % i)
+        print("Starting iperf sender h%d"%i)
+        # long lived TCP flow from clients to server at h0.
+        client = h.popen("iperf -c %s -p 5001 -t 3600" % (receiver.IP()), shell=True)
+    return
+
+
+def start_qmon(iface, interval_sec=0.001, outfile="q.txt"):
     monitor = Process(target=monitor_qlen, args=(iface, interval_sec, outfile))
     monitor.start()
     return monitor
@@ -194,4 +238,3 @@ if __name__ == "__main__":
         os.makedirs(args.dir)
 
     dctcp()
-
