@@ -11,7 +11,7 @@ from subprocess import Popen, PIPE
 from multiprocessing import Process
 from argparse import ArgumentParser
 
-from monitor import monitor_qlen
+from mininetutil.monitor import monitor_qlen
 import os
 
 parser = ArgumentParser(description="DCTCP experiment")
