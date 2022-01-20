@@ -8,7 +8,7 @@ bw_receiver=100
 delay=0.25
 
 hosts=3
-qsize=120
+qsize=150
 
 dir=output
 
@@ -18,19 +18,16 @@ if [ "$UID" != "0" ]; then
     exit 0
 fi
 
-# Experiment 1
-# Queue occupancy over time - comparing DCTCP & TCP
-
-#Make directories for TCP, DCTCP and the comparison graph
-dir_dctcp_reno=dctcp_reno_q$qsize
-dir_dctcp_cubic=dctcp_cubic_q$qsize
-dir_tcp=tcp_q$qsize
+#Make directories for TCP, DCTCP
+dir_dctcp_reno=$0_dctcp_reno
+dir_dctcp_cubic=$0_dctcp_cubic
+dir_tcp=$0_tcp
 
 mkdir -p $dir/$dir_dctcp_cubic
 mkdir -p $dir/$dir_dctcp_reno
 mkdir -p $dir/$dir_tcp 
 
-# Measure queue occupancy with DCTCP - RENO
+# Measure queue occupancy, throughput, cwnd with DCTCP - RENO
 # RED parameters are default see dctcp.py for details
 python3 dctcp.py --hosts $hosts \
                 --bw-sender $bw_sender \
@@ -43,6 +40,7 @@ python3 dctcp.py --hosts $hosts \
                 --dctcp True \
                 --cca reno
 
+# Measure queue occupancy, throughput, cwnd with DCTCP - Cubic
 python3 dctcp.py --hosts $hosts \
                 --bw-sender $bw_sender \
                 --bw-receiver $bw_receiver \
@@ -54,7 +52,7 @@ python3 dctcp.py --hosts $hosts \
                 --dctcp True \
                 --cca cubic
 
-# Measure queue occupancy with TCP
+# Measure queue occupancy, throughput, cwnd with TCP
 python3 dctcp.py --hosts $hosts \
                 --bw-sender $bw_sender \
                 --bw-receiver $bw_receiver \

@@ -211,13 +211,14 @@ def start_iperf(net):
     print("Starting iperf server")
 
     # Starting iperf in server mode with a window size of 16Mb
-    server = receiver.popen("iperf -s -w 16m")
+    print("Starting iperf sender server h0")
+    server = receiver.popen("iperf -s -w 16m -i 1 > %s/iperf_receiver.txt &" % args.dir)
 
     for i in range(1,args.hosts):
         h = net.get('h%s' % i)
-        print("Starting iperf sender h%d"%i)
+        print("Starting iperf client h%d"%i)
         # long lived TCP flow from clients to server at h0.
-        client = h.popen("iperf -c %s -p 5001 -t 3600" % (receiver.IP()), shell=True)
+        client = h.popen("iperf -c %s -p 5001 -t 3600 -i 1 > %s/iperf_%d.txt &" % (receiver.IP(), args.dir, i), shell=True)
     return
 
 
