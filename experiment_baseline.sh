@@ -10,7 +10,7 @@ delay=0.25
 hosts=3
 qsize=150
 
-dir=output
+dir=output_$(basename $0 ".sh")
 
 # WARNING
 if [ "$UID" != "0" ]; then
@@ -19,9 +19,9 @@ if [ "$UID" != "0" ]; then
 fi
 
 #Make directories for TCP, DCTCP
-dir_dctcp_reno=$0_dctcp_reno
-dir_dctcp_cubic=$0_dctcp_cubic
-dir_tcp=$0_tcp
+dir_dctcp_reno=dctcp_reno
+dir_dctcp_cubic=dctcp_cubic
+dir_tcp=tcp
 
 mkdir -p $dir/$dir_dctcp_cubic
 mkdir -p $dir/$dir_dctcp_reno
