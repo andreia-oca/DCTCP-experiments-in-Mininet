@@ -14,7 +14,7 @@ dir=output
 
 # WARNING
 if [ "$UID" != "0" ]; then
-    warn "Please run as root"
+    echo "Please run as root"
     exit 0
 fi
 

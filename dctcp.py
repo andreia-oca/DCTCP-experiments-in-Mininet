@@ -169,7 +169,7 @@ def dctcp():
     print("Test all connections in the network:")
     network.pingAll()
 
-    # TODO Add Experiments
+    # Setup TCP connections
     start_iperf(network)
     sleep(30)
     
@@ -177,10 +177,12 @@ def dctcp():
     
     # Monitor the congestion window (it should resize according to 
     # the CCA used RENO or CUBIC)
+    print("Start tcp:tcp_probe tracepoint.")
     start_tcpprobe()
 
     # Start monitoring the queue size.
     # The interface that I am monitoring is the one between the switch and the receiver 
+    print("Start monitor the queue occupancy.")
     qmon = start_qmon(iface='s0-eth1', outfile='%s/q.txt' % (args.dir))
 
     start_time = time()
@@ -197,12 +199,12 @@ def dctcp():
 # tcp_probe is a kernel module which records the congestion window (cwnd)) over time. 
 # In linux OS >= 4.16 it has been replaced by the tcp:tcp_probe kernel tracepoint.
 def start_tcpprobe(outfile="cwnd.txt"):
-    os.system("echo -n 1 | sudo tee /sys/kernel/debug/tracing/events/tcp/tcp_probe/enable")
-    Popen("sudo cat /sys/kernel/debug/tracing/events/tcp/tcp_probe/trace > %s/%s" % (args.dir, outfile),shell=True)
+    os.system("echo -n 1 | sudo tee /sys/kernel/debug/tracing/events/tcp/tcp_probe/enable &> /dev/null")
+    Popen("cat /sys/kernel/debug/tracing/trace > %s/%s" % (args.dir, outfile), shell=True)
 
 def stop_tcpprobe():
-    os.system("echo -n 0 | sudo tee /sys/kernel/debug/tracing/events/tcp/tcp_probe/enable")
-    Popen("killall -9 cat", shell=True).wait()
+    os.system("echo -n 0 | sudo tee /sys/kernel/debug/tracing/events/tcp/tcp_probe/enable &> /dev/null")
+    Popen("killall -9 cat 2> /dev/null", shell=True).wait()
 
 def start_iperf(net):
     receiver = net.get('h0')
