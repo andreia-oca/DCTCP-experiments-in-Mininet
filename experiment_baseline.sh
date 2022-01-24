@@ -19,13 +19,13 @@ if [ "$UID" != "0" ]; then
 fi
 
 #Make directories for TCP, DCTCP
-dir_dctcp_reno=dctcp_reno
-dir_dctcp_cubic=dctcp_cubic
-dir_tcp=tcp
+dir_dctcp_reno=dctcp
+dir_tcp_reno=tcp_reno
+dir_tcp_cubic=tcp_cubic
 
-mkdir -p $dir/$dir_dctcp_cubic
 mkdir -p $dir/$dir_dctcp_reno
-mkdir -p $dir/$dir_tcp 
+mkdir -p $dir/$dir_tcp_reno 
+mkdir -p $dir/$dir_tcp_cubic
 
 # Measure queue occupancy, throughput, cwnd with DCTCP - RENO
 # RED parameters are default see dctcp.py for details
@@ -38,25 +38,28 @@ python3 dctcp.py --hosts $hosts \
                 --red True \
                 --ecn True \
                 --dctcp True \
-                --cca reno
+                --cca reno \
+                --red_limit 1000000 \
+                --red_min 30000 \
+                --red_max 30001 \
+                --red_avpkt 1500 \
+                --red_burst 20 \
+                --red_prob 1
 
-# Measure queue occupancy, throughput, cwnd with DCTCP - Cubic
+# Measure queue occupancy, throughput, cwnd with TCP - RENO
 python3 dctcp.py --hosts $hosts \
                 --bw-sender $bw_sender \
                 --bw-receiver $bw_receiver \
                 --delay $delay \
-                --dir $dir/$dir_dctcp_cubic \
+                --dir $dir/$dir_tcp_reno \
                 --maxq $qsize \
-                --red True \
-                --ecn True \
-                --dctcp True \
+                --cca reno
+
+# Measure queue occupancy, throughput, cwnd with TCP - CUBIC
+python3 dctcp.py --hosts $hosts \
+                --bw-sender $bw_sender \
+                --bw-receiver $bw_receiver \
+                --delay $delay \
+                --dir $dir/$dir_tcp_cubic \
+                --maxq $qsize \
                 --cca cubic
-
-# Measure queue occupancy, throughput, cwnd with TCP
-python3 dctcp.py --hosts $hosts \
-                --bw-sender $bw_sender \
-                --bw-receiver $bw_receiver \
-                --delay $delay \
-                --dir $dir/$dir_tcp \
-                --maxq $qsize \
-                --cca reno

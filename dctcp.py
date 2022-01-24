@@ -48,7 +48,7 @@ parser.add_argument('--maxq',
 parser.add_argument('--time', '-t',
                     help="Duration (sec) to run the experiment",
                     type=int,
-                    default=10)
+                    default=30)
 
 parser.add_argument('--red',
                     help="Enable RED, by default is disabled",
@@ -77,15 +77,15 @@ parser.add_argument('--red_limit',
 
 parser.add_argument('--red_min',
                     help="RED min marking threshold",
-                    default="20000")
+                    default="30000")
 
 parser.add_argument('--red_max',
                     help="RED max marking threshold",
-                    default="25000")
+                    default="30001")
 
 parser.add_argument('--red_avpkt',
                     help="RED average packet size",
-                    default="1000")
+                    default="1500")
 
 parser.add_argument('--red_burst',
                     help="RED burst size",
@@ -152,6 +152,7 @@ class DCTopo(Topo):
 
 def dctcp():
     # Configure CCA (RENO or CUBIC)
+    print("=================== Start Experiment ===================")
     os.system("sudo sysctl -w net.ipv4.tcp_congestion_control=%s" % args.cca)
 
     if (args.dctcp):
@@ -195,6 +196,7 @@ def dctcp():
     stop_tcpprobe()
     qmon.terminate()
     network.stop()
+    print("=================== END Experiment ===================")
 
 # tcp_probe is a kernel module which records the congestion window (cwnd)) over time. 
 # In linux OS >= 4.16 it has been replaced by the tcp:tcp_probe kernel tracepoint.
