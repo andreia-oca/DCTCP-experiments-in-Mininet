@@ -20,15 +20,32 @@ Parameters interesting to vary:
  - K - ECN threshold (5 20 65 80 100) (packets)
  - the number of hosts (3, 5, 10, 20, 100) 
 
-The queue length will be constant 150 packets
+***Note***: The queue length will be constant 150 packets.
+
+***Note***: Mininet supports bandwidth up to 1000 Mbps.
+
+***Note***: TCP - CUBIC and TCp - Reno are not stable using a bandwidth greater than 100 Mbps.
+
+## Demo commands
+
+```
+sudo ./demo.py
+
+sudo python mininetutil/plot_queue.py -f output_demo/dctcp/q.txt output_demo/tcp_reno/q.txt output_demo/tcp_cubic/q.txt --legend DCTCP TCP-RENO TCP-CUBIC -o output_demo/q.png
+
+sudo python mininetutil/plot_queue.py -f output_demo/dctcp/q.txt output_demo/tcp_reno/q.txt output_demo/tcp_cubic/q.txt --legend DCTCP TCP-RENO TCP-CUBIC -o output_demo/q_cdf.png --cdf
+```
 
 ## Plot the data
 Use the scripts from `./mininetutil/`. For now, their are designed to use with `python2`.
 
 Examples:
 ```
-TODO
+sudo python mininetutil/plot_queue.py -f output_experiment_baseline/dctcp/q.txt output_experiment_baseline/tcp_reno/q.txt output_experiment_baseline/tcp_cubic/q.txt --legend DCTCP TCP-RENO TCP-CUBIC -o output_experiment_baseline/q.png
+
+sudo python mininetutil/plot_queue.py -f output_experiment_baseline/dctcp/q.txt output_experiment_baseline/tcp_reno/q.txt output_experiment_baseline/tcp_cubic/q.txt --legend DCTCP TCP-RENO TCP-CUBIC -o output_experiment_baseline/q_cdf.png --cdf
 ```
+
 ## References
 Papers and articles:
  - [Mininet documentation](https://github.com/mininet/mininet/wiki/Documentation);
