@@ -65,6 +65,5 @@ do
                     --maxq $qsize \
                     --cca cubic
     
-    python mininetutil/plot_queue.py -f $dir/$dir_dctcp_reno/q.txt $dir/$dir_tcp_reno/q.txt $dir/$dir_tcp_cubicq.txt --legend DCTCP TCP-RENO TCP-CUBIC -o $dir/q_$hosts.png
-    python mininetutil/plot_queue.py -f $dir/$dir_dctcp_reno/q.txt $dir/$dir_tcp_reno/q.txt $dir/$dir_tcp_cubic/q.txt --legend DCTCP TCP-RENO TCP-CUBIC -o $dir/q_$hosts_cdf.png --cdf
+    python mininetutil/plot_queue.py -f $dir/$dir_dctcp_reno/q.txt $dir/$dir_tcp_reno/q.txt $dir/$dir_tcp_cubic/q.txt --legend DCTCP TCP-RENO TCP-CUBIC -o $dir/q_$hosts.png
 done
