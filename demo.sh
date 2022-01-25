@@ -44,7 +44,7 @@ python3 dctcp.py --hosts $hosts \
                 --red_max 30001 \
                 --red_avpkt 1500 \
                 --red_burst 20 \
-                --red_prob 1
+                --red_prob 1 \
                 --time 15
 
 # Measure queue occupancy, throughput, cwnd with TCP - RENO
@@ -54,7 +54,7 @@ python3 dctcp.py --hosts $hosts \
                 --delay $delay \
                 --dir $dir/$dir_tcp_reno \
                 --maxq $qsize \
-                --cca reno
+                --cca reno \
                 --time 15
 
 # Measure queue occupancy, throughput, cwnd with TCP - CUBIC
@@ -64,5 +64,9 @@ python3 dctcp.py --hosts $hosts \
                 --delay $delay \
                 --dir $dir/$dir_tcp_cubic \
                 --maxq $qsize \
-                --cca cubic
+                --cca cubic \
                 --time 15
+
+
+python mininetutil/plot_queue.py -f $dir/$dir_dctcp_reno/q.txt $dir/$dir_tcp_reno/q.txt $dir/$dir_tcp_cubic/q.txt --legend DCTCP TCP-RENO TCP-CUBIC -o $dir/q_$hosts.png
+python mininetutil/plot_queue.py -f $dir/$dir_dctcp_reno/q.txt $dir/$dir_tcp_reno/q.txt $dir/$dir_tcp_cubic/q.txt --legend DCTCP TCP-RENO TCP-CUBIC -o $dir/q_cdf_$hosts.png --cdf
